@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Word Puzzle Game</title>
+   <style>
+       * {
+           margin: 0;
+           padding: 0;
+           box-sizing: border-box;
+       }
+
+       body {
+           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+           min-height: 100vh;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           padding: 20px;
+       }
+
+       .container {
+           background: white;
+           border-radius: 20px;
+           padding: 40px;
+           box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+           max-width: 450px;
+           width: 100%;
+           text-align: center;
+       }
+
+       h1 {
+           color: #333;
+           margin-bottom: 10px;
+           font-size: 2rem;
+       }
+
+       .subtitle {
+           color: #666;
+           margin-bottom: 30px;
+       }
+
+       /* Login Styles */
+       .login-form {
+           display: flex;
+           flex-direction: column;
+           gap: 20px;
+       }
+
+       .input-group {
+           display: flex;
+           flex-direction: column;
+           text-align: left;
+       }
+
+       label {
+           color: #555;
+           font-weight: bold;
+           margin-bottom: 8px;
+           font-size: 0.9rem;
+       }
+
+       input[type="text"],
+       input[type="password"] {
+           padding: 15px;
+           border: 2px solid #ddd;
+           border-radius: 10px;
+           font-size: 1rem;
+           transition: border-color 0.3s;
+       }
+
+       input[type="text"]:focus,
+       input[type="password"]:focus {
+           outline: none;
+           border-color: #667eea;
+       }
+
+       /* Level Selection */
+       .level-selection {
+           display: none;
+       }
+
+       .level-cards {
+           display: flex;
+           flex-direction: column;
+           gap: 15px;
+           margin-top: 20px;
+       }
+
+       .level-card {
+           padding: 25px;
+           border-radius: 15px;
+           cursor: pointer;
+           transition: transform 0.3s, box-shadow 0.3s;
+           border: 3px solid transparent;
+       }
+
+       .level-card:hover {
+           transform: translateY(-5px);
+           box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+       }
+
+       .level-card.easy {
+           background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+       }
+
+       .level-card.medium {
+           background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%);
+       }
+
+       .level-card.hard {
+           background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+       }
+
+       .level-card h3 {
+           color: white;
+           font-size: 1.5rem;
+           margin-bottom: 5px;
+       }
+
+       .level-card p {
+           color: rgba(255,255,255,0.9);
+           font-size: 0.9rem;
+       }
+
+       /* Game Styles */
+       .game-screen {
+           display: none;
+       }
+
+       .back-btn {
+           position: absolute;
+           top: 20px;
+           left: 20px;
+           background: #f0f0f0;
+           border: none;
+           padding: 10px 15px;
+           border-radius: 10px;
+           cursor: pointer;
+           font-size: 1rem;
+           transition: background 0.3s;
+       }
+
+       .back-btn:hover {
+           background: #e0e0e0;
+       }
+
+       .game-header {
+           display: flex;
+           justify-content: space-between;
+           align-items: center;
+           margin-bottom: 20px;
+           padding: 15px;
+           background: #f8f9fa;
+           border-radius: 10px;
+       }
+
+       .game-info {
+           text-align: center;
+       }
+
+       .game-info-value {
+           font-size: 1.3rem;
+           font-weight: bold;
+           color: #667eea;
+       }
+
+       .game-info-label {
+           font-size: 0.75rem;
+           color: #666;
+       }
+
+       .difficulty-badge {
+           padding: 5px 15px;
+           border-radius: 20px;
+           font-size: 0.8rem;
+           font-weight: bold;
+           color: white;
+       }
+
+       .difficulty-badge.easy { background: #28a745; }
+       .difficulty-badge.medium { background: #fd7e14; }
+       .difficulty-badge.hard { background: #dc3545; }
+
+       .word-display {
+           margin: 30px 0;
+       }
+
+       .scrambled-word {
+           font-size: 2.2rem;
+           letter-spacing: 8px;
+           color: #764ba2;
+           font-weight: bold;
+           text-transform: uppercase;
+           min-height: 50px;
+           display: flex;
+           justify-content: center;
+           align-items: center;
+           flex-wrap: wrap;
+       }
+
+       .hint-text {
+           color: #666;
+           font-style: italic;
+           margin-top: 15px;
+           min-height: 24px;
+           font-size: 0.95rem;
+       }
+
+       .guess-input {
+           width: 100%;
+           padding: 18px;
+           font-size: 1.2rem;
+           text-align: center;
+           border: 3px solid #ddd;
+           border-radius: 12px;
+           text-transform: uppercase;
+           letter-spacing: 3px;
+           margin-bottom: 20px;
+           transition: border-color 0.3s;
+       }
+
+       .guess-input:focus {
+           outline: none;
+           border-color: #667eea;
+       }
+
+       .game-buttons {
+           display: flex;
+           gap: 10px;
+           flex-wrap: wrap;
+           justify-content: center;
+       }
+
+       .btn {
+           padding: 12px 25px;
+           font-size: 1rem;
+           border: none;
+           border-radius: 10px;
+           cursor: pointer;
+           transition: transform 0.2s, box-shadow 0.2s;
+           font-weight: bold;
+       }
+
+       .btn:hover {
+           transform: translateY(-2px);
+           box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+       }
+
+       .btn-primary {
+           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+           color: white;
+       }
+
+       .btn-hint {
+           background: #ffc107;
+           color: #333;
+       }
+
+       .btn-skip {
+           background: #6c757d;
+           color: white;
+       }
+
+       .message {
+           margin-top: 20px;
+           padding: 15px;
+           border-radius: 10px;
+           font-weight: bold;
+       }
+
+       .message.success {
+           background: #d4edda;
+           color: #155724;
+       }
+
+       .message.error {
+           background: #f8d7da;
+           color: #721c24;
+       }
+
+       .message.info {
+           background: #d1ecf1;
+           color: #0c5460;
+       }
+
+       .user-display {
+           display: flex;
+           align-items: center;
+           gap: 10px;
+           margin-bottom: 20px;
+           padding: 15px;
+           background: #f0f0f0;
+           border-radius: 10px;
+       }
+
+       .user-avatar {
+           width: 50px;
+           height: 50px;
+           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+           border-radius: 50%;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           font-size: 1.5rem;
+       }
+
+       .user-name {
+           font-weight: bold;
+           color: #333;
+       }
+
+       @media (max-width: 500px) {
+           .container {
+               padding: 25px;
+           }
+           
+           h1 {
+               font-size: 1.5rem;
+           }
+           
+           .scrambled-word {
+               font-size: 1.6rem;
+               letter-spacing: 4px;
+           }
+       }
+   </style>
+</head>
+<body>
+   <!-- Login Screen -->
+   <div class="container" id="loginScreen">
+       <h1>🎯 Word Puzzle</h1>
+       <p class="subtitle">Test your word skills!</p>
+       <form class="login-form" onsubmit="return login(event)">
+           <div class="input-group">
+               <label for="username">Username</label>
+               <input type="text" id="username" placeholder="Enter your name" required>
+           </div>
+           <div class="input-group">
+               <label for="password">Password</label>
+               <input type="password" id="password" placeholder="Enter password" required>
+           </div>
+           <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+       </form>
+   </div>
+
+   <!-- Level Selection Screen -->
+   <div class="container level-selection" id="levelScreen">
+       <h1>Select Difficulty</h1>
+       <p class="subtitle">Choose your challenge level</p>
+       <div class="level-cards">
+           <div class="level-card easy" onclick="startGame('easy')">
+               <h3>🌟 Easy</h3>
+               <p>3-4 letter words • Perfect for beginners</p>
+           </div>
+           <div class="level-card medium" onclick="startGame('medium')">
+               <h3>⚡ Medium</h3>
+               <p>5-6 letter words • Moderate challenge</p>
+           </div>
+           <div class="level-card hard" onclick="startGame('hard')">
+               <h3>🔥 Hard</h3>
+               <p>7+ letter words • For word masters</p>
+           </div>
+       </div>
+   </div>
+
+   <!-- Game Screen -->
+   <div class="container game-screen" id="gameScreen" style="position: relative;">
+       <button class="back-btn" onclick="backToLevels()">← Back</button>
+       
+       <h1>Word Puzzle</h1>
+       
+       <div class="user-display">
+           <div class="user-avatar">👤</div>
+           <div>
+               <div class="user-name" id="displayUsername">Player</div>
+               <span class="difficulty-badge" id="difficultyBadge">Easy</span>
+           </div>
+       </div>
+
+       <div class="game-header">
+           <div class="game-info">
+               <div class="game-info-value" id="score">0</div>
+               <div class="game-info-label">Score</div>
+           </div>
+           <div class="game-info">
+               <div class="game-info-value" id="streak">0</div>
+               <div class="game-info-label">Streak</div>
+           </div>
+           <div class="game-info">
+               <div class="game-info-value" id="solved">0</div>
+               <div class="game-info-label">Solved</div>
+           </div>
+       </div>
+
+       <div class="word-display">
+           <div class="scrambled-word" id="scrambledWord">WORD</div>
+           <div class="hint-text" id="hintText"></div>
+       </div>
+
+       <input type="text" class="guess-input" id="guessInput" placeholder="Your guess..." autocomplete="off">
+
+       <div class="game-buttons">
+           <button class="btn btn-primary" onclick="checkAnswer()">Submit</button>
+           <button class="btn btn-hint" onclick="showHint()">💡 Hint</button>
+           <button class="btn btn-skip" onclick="skipWord()">Skip</button>
+       </div>
+
+       <div class="message info" id="message">Unscramble the word above!</div>
+   </div>
+
+   <script>
+       // HTML - Word Lists by Difficulty
+       const wordLists = {
+           easy: [
+               { word: 'CAT', hint: 'Feline pet' },
+               { word: 'DOG', hint: 'Loyal pet' },
+               { word: 'SUN', hint: 'Star that gives us light' },
+               { word: 'HAT', hint: 'Worn on head' },
+               { word: 'BALL', hint: 'Round toy' },
+               { word: 'FISH', hint: 'Swims in water' },
+               { word: 'BIRD', hint: 'Animal that flies' },
+               { word: 'TREE', hint: 'Tall plant' },
+               { word: 'DOOR', hint: 'Entrance to a room' },
+               { word: 'MOON', hint: 'Earth\'s satellite' },
+               { word: 'BOOK', hint: 'Has pages to read' },
+               { word: 'CAKE', hint: 'Birthday dessert' },
+               { word: 'DESK', hint: 'Work surface' },
+               { word: 'HAND', hint: 'Body part with fingers' },
+               { word: 'LAMP', hint: 'Gives light' }
+           ],
+           medium: [
+               { word: 'BANANA', hint: 'Yellow curved fruit' },
+               { word: 'GARDEN', hint: 'Place to grow plants' },
+               { word: 'PIANO', hint: 'Musical instrument with keys' },
+               { word: 'RABBIT', hint: 'Hopping animal with long ears' },
+               { word: 'TURTLE', hint: 'Slow animal with a shell' },
+               { word: 'SUMMER', hint: 'Hottest season' },
+               { word: 'WINTER', hint: 'Coldest season' },
+               { word: 'PURPLE', hint: 'Color mix of red and blue' },
+               { word: 'ORANGE', hint: 'Color and citrus fruit' },
+               { word: 'CASTLE', hint: 'Fortress home of royalty' },
+               { word: 'BRIDGE', hint: 'Crosses over water' },
+               { word: 'SPIDER', hint: 'Eight-legged insect' },
+               { word: 'ICECREAM', hint: 'Frozen sweet treat' },
+               { word: 'BALLOON', hint: 'Filled with air, floats up' },
+               { word: 'CANDLE', hint: 'Wax with a wick' }
+           ],
+           hard: [
+               { word: 'ELEPHANT', hint: 'Largest land mammal' },
+               { word: 'BUTTERFLY', hint: 'Colorful flying insect' },
+               { word: 'CHOCOLATE', hint: 'Sweet cocoa treat' },
+               { word: 'UMBRELLA', hint: 'Protects from rain' },
+               { word: 'DINOSAUR', hint: 'Extinct prehistoric reptile' },
+               { word: 'TELESCOPE', hint: 'Tool to see distant stars' },
+               { word: 'VOLCANO', hint: 'Mountain that erupts' },
+               { word: 'ASTRONAUT', hint: 'Travels to space' },
+               { word: 'BUTTERFLY', hint: 'Starts as a caterpillar' },
+               { word: 'CHAMPION', hint: 'Winner of competition' },
+               { word: 'ADVENTURE', hint: 'Exciting journey' },
+               { word: 'GRAPEFRUIT', hint: 'Large citrus fruit' },
+               { word: 'WATERFALL', hint: 'Water flowing down rocks' },
+               { word: 'MARATHON', hint: 'Long distance race' },
+               { word: 'EXPEDITION', hint: 'Journey for exploration' }
+           ]
+       };
+
+       // CSS - State Management
+       let currentUser = '';
+       let currentDifficulty = '';
+       let currentWord = null;
+       let scrambledWord = '';
+       let score = 0;
+       let streak = 0;
+       let solved = 0;
+       let hintUsed = false;
+
+       // JavaScript - Functions
+
+       function login(event) {
+           event.preventDefault();
+           currentUser = document.getElementById('username').value;
+           document.getElementById('loginScreen').style.display = 'none';
+           document.getElementById('levelScreen').style.display = 'block';
+           return false;
+       }
+
+       function startGame(difficulty) {
+           currentDifficulty = difficulty;
+           document.getElementById('levelScreen').style.display = 'none';
+           document.getElementById('gameScreen').style.display = 'block';
+           document.getElementById('displayUsername').textContent = currentUser;
+           
+           const badge = document.getElementById('difficultyBadge');
+           badge.textContent = difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
+           badge.className = 'difficulty-badge ' + difficulty;
+           
+           resetGame();
+           newRound();
+       }
+
+       function backToLevels() {
+           document.getElementById('gameScreen').style.display = 'none';
+           document.getElementById('levelScreen').style.display = 'block';
+           resetGame();
+       }
+
+       function resetGame() {
+           score = 0;
+           streak = 0;
+           solved = 0;
+           updateScoreboard();
+       }
+
+       function shuffleWord(word) {
+           let array = word.split('');
+           for (let i = array.length - 1; i > 0; i--) {
+               let j = Math.floor(Math.random() * (i + 1));
+               [array[i], array[j]] = [array[j], array[i]];
+           }
+           let result = array.join('');
+           if (result === word) return shuffleWord(word);
+           return result;
+       }
+
+       function newRound() {
+           hintUsed = false;
+           document.getElementById('hintText').textContent = '';
+           document.getElementById('guessInput').value = '';
+           document.getElementById('message').textContent = 'Unscramble the word!';
+           document.getElementById('message').className = 'message info';
+           document.getElementById('guessInput').focus();
+
+           const words = wordLists[currentDifficulty];
+           currentWord = words[Math.floor(Math.random() * words.length)];
+           scrambledWord = shuffleWord(currentWord.word);
+           
+           document.getElementById('scrambledWord').textContent = scrambledWord;
+       }
+
+       function checkAnswer() {
+           const guess = document.getElementById('guessInput').value.toUpperCase().trim();
+           const messageEl = document.getElementById('message');
+
+           if (!guess) {
+               messageEl.textContent = 'Please enter a guess!';
+               messageEl.className = 'message error';
+               return;
+           }
+
+           if (guess === currentWord.word) {
+               let points = currentDifficulty === 'easy' ? 10 : currentDifficulty === 'medium' ? 20 : 30;
+               if (hintUsed) points = Math.floor(points / 2);
+               
+               score += points;
+               streak++;
+               solved++;
+               updateScoreboard();
+               
+               messageEl.textContent = `✅ Correct! +${points} points`;
+               messageEl.className = 'message success';
+               
+               setTimeout(newRound, 1500);
+           } else {
+               streak = 0;
+               updateScoreboard();
+               messageEl.textContent = '❌ Wrong! Try again.';
+               messageEl.className = 'message error';
+               document.getElementById('guessInput').value = '';
+               document.getElementById('guessInput').focus();
+           }
+       }
+
+       function showHint() {
+           if (!hintUsed) {
+               hintUsed = true;
+               document.getElementById('hintText').textContent = 'Hint: ' + currentWord.hint;
+           }
+       }
+
+       function skipWord() {
+           streak = 0;
+           updateScoreboard();
+           document.getElementById('message').textContent = 'Skipped! Answer: ' + currentWord.word;
+           document.getElementById('message').className = 'message info';
+           setTimeout(newRound, 2000);
+       }
+
+       function updateScoreboard() {
+           document.getElementById('score').textContent = score;
+           document.getElementById('streak').textContent = streak;
+           document.getElementById('solved').textContent = solved;
+       }
+
+       // Enter key support
+       document.addEventListener('DOMContentLoaded', function() {
+           document.getElementById('guessInput').addEventListener('keypress', function(e) {
+               if (e.key === 'Enter') checkAnswer();
+           });
+       });
+   </script>
+</body>
+</html>
